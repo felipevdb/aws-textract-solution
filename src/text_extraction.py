@@ -11,6 +11,7 @@ import sys
 import uuid
 import re
 import time
+import pandas
 
 SIMILARITY_THRESHOLD = 95.0
 client = boto3.client('textract')
@@ -42,6 +43,50 @@ def annotate_image(boudingBoxes, image, height, width):
             draw.text(x, f"Conf: {box['confidence']}", font=font, fill=(255, 255, 0, 128))
 
     return image
+
+def create_table(table_blocks, block_map_table):
+    if len(table_blocks) <= 0:
+        return "<b> NO Table FOUND </b>"
+
+    csv = ''
+    for index, table in enumerate(table_blocks):
+        csv += generate_table_csv(table, block_map_table, index +1)
+        csv += '\n\n'
+    return csv
+
+def generate_table_csv(table_result, blocks_map, table_index):
+    rows = get_rows_columns_map(table_result, blocks_map)
+
+    table_id = 'Table_' + str(table_index)
+    
+    # get cells.
+    csv = 'Table: {0}\n\n'.format(table_id)
+
+    for row_index, cols in rows.items():
+        
+        for col_index, text in cols.items():
+            csv += '{}'.format(text) + ","
+        csv += '\n'
+        
+    csv += '\n\n\n'
+    return csv
+
+def get_rows_columns_map(table_result, blocks_map):
+    rows = {}
+    for relationship in table_result['Relationships']:
+        if relationship['Type'] == 'CHILD':
+            for child_id in relationship['Ids']:
+                cell = blocks_map[child_id]
+                if cell['BlockType'] == 'CELL':
+                    row_index = cell['RowIndex']
+                    col_index = cell['ColumnIndex']
+                    if row_index not in rows:
+                        # create new row
+                        rows[row_index] = {}
+                        
+                    # get the text value
+                    rows[row_index][col_index] = get_text(cell, blocks_map)
+    return rows
 
 def get_forms_relationship(key_map, value_map, block_map_forms):
     kvs = {}
@@ -99,6 +144,8 @@ def get_Block_Informations(blockType, textract_resp):
         block_id = block['Id']
         block_map_forms[block_id] = block
 
+        block_map_table[block['Id']] = block
+
         if (block['BlockType'] in str(blockType)):
             boundingBox['confidence'] = block['Confidence']
             boundingBox['boundingbox'] = block['Geometry']['BoundingBox']
@@ -116,7 +163,6 @@ def get_Block_Informations(blockType, textract_resp):
                     value_map[block_id] = block
 
             if (block['BlockType'] == 'TABLE'):
-                block_map_table[block['Id']] = block
                 table_blocks.append(block)
 
     return boudingBoxes, lines, key_map, value_map, block_map_forms, block_map_table, table_blocks
@@ -215,6 +261,9 @@ def main(filename, APItype, featureType):
     key_value = get_forms_relationship(key_map, value_map, block_map_forms)
     print_forms(key_value)
 
+    #Get tables relationships
+    csv = create_table(table_blocks, block_map_table)
+    #print(csv)
 
     image = annotate_image (boudingBoxes, image, height, width)
     image.show()
