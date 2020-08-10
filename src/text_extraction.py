@@ -86,8 +86,9 @@ def get_rows_columns_map(table_result, blocks_map):
 def print_tables(tables):
     if len(tables) <= 0:
         return "<b> NO Table FOUND / OR SEARCHED </b>"
-    else:   
+    else:  
         for index in tables:
+            print("\n\n== TABLE ===\n")
             print(tabulate(tables[index]))
     print('\n\n')
 
