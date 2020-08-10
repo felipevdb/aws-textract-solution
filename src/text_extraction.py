@@ -11,7 +11,7 @@ import sys
 import uuid
 import re
 import time
-import pandas
+from tabulate import tabulate
 
 SIMILARITY_THRESHOLD = 95.0
 client = boto3.client('textract')
@@ -44,32 +44,27 @@ def annotate_image(boudingBoxes, image, height, width):
 
     return image
 
-def create_table(table_blocks, block_map_table):
-    if len(table_blocks) <= 0:
-        return "<b> NO Table FOUND </b>"
-
-    csv = ''
+def get_tables(table_blocks, block_map_table):
+    tables = {}
     for index, table in enumerate(table_blocks):
-        csv += generate_table_csv(table, block_map_table, index +1)
-        csv += '\n\n'
-    return csv
+        tables[index] = generate_table(table, block_map_table, index +1)
+        #csv += '\n\n'
+    return tables
 
-def generate_table_csv(table_result, blocks_map, table_index):
+def generate_table(table_result, blocks_map, table_index):
     rows = get_rows_columns_map(table_result, blocks_map)
 
     table_id = 'Table_' + str(table_index)
-    
-    # get cells.
-    csv = 'Table: {0}\n\n'.format(table_id)
 
+    table = []
+    
     for row_index, cols in rows.items():
-        
+        row = []
         for col_index, text in cols.items():
-            csv += '{}'.format(text) + ","
-        csv += '\n'
+            row.append('{}'.format(text))
+        table.append(row)
         
-    csv += '\n\n\n'
-    return csv
+    return table
 
 def get_rows_columns_map(table_result, blocks_map):
     rows = {}
@@ -87,6 +82,14 @@ def get_rows_columns_map(table_result, blocks_map):
                     # get the text value
                     rows[row_index][col_index] = get_text(cell, blocks_map)
     return rows
+
+def print_tables(tables):
+    if len(tables) <= 0:
+        return "<b> NO Table FOUND / OR SEARCHED </b>"
+    else:   
+        for index in tables:
+            print(tabulate(tables[index]))
+    print('\n\n')
 
 def get_forms_relationship(key_map, value_map, block_map_forms):
     kvs = {}
@@ -121,8 +124,11 @@ def get_text(result, blocks_map):
     return text
 
 def print_forms(kvs):
-    for key, value in kvs.items():
-        print(key, ":", value)
+    if (len(kvs) > 0):
+        print("\n\n== FOUND KEY : VALUE pairs ===\n")
+        for key, value in kvs.items():
+            print(key, ":", value)
+        print('\n\n')
 
 def get_Block_Informations(blockType, textract_resp):
     boudingBoxes = []
@@ -177,6 +183,9 @@ def get_API_blockType (APItype, featureType):
 
     if ((APItype == 'analyze_document') and (featureType == 'F')):
         blockType = ['KEY_VALUE_SET']
+
+    if ((APItype == 'analyze_document') and (featureType == 'A')):
+        blockType = ['TABLE', 'CELL', 'KEY_VALUE_SET']
 
     return blockType
 
@@ -256,14 +265,17 @@ def main(filename, APItype, featureType):
     #Extracting Useful informations on textract response
     blockType = get_API_blockType (APItype, featureType)
     boudingBoxes, lines, key_map, value_map, block_map_forms, block_map_table, table_blocks = get_Block_Informations(blockType, textract_resp)
+
+    #Getting Lines and accuracy
+
     
     #Get Forms relationship
     key_value = get_forms_relationship(key_map, value_map, block_map_forms)
     print_forms(key_value)
 
     #Get tables relationships
-    csv = create_table(table_blocks, block_map_table)
-    #print(csv)
+    tables = get_tables(table_blocks, block_map_table)
+    print_tables(tables)
 
     image = annotate_image (boudingBoxes, image, height, width)
     image.show()
