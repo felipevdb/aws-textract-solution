@@ -36,10 +36,10 @@ def annotate_image(boudingBoxes, image, height, width):
     for box in boudingBoxes:
         x, y = show_bounding_box_positions(height, width, box['boundingbox'], "ROTATE_0")
         if box['confidence'] >= SIMILARITY_THRESHOLD:
-            draw.rectangle((x, y), fill=None, outline="#00ff00", width=8)
+            draw.rectangle((x, y), fill=None, outline="#00ff00", width=2)
             draw.text(x, f"Conf: {box['confidence']}", font=font, fill=(255, 255, 0, 128))
         else:
-            draw.rectangle((x, y), fill=None, outline="#ff0000", width=4)
+            draw.rectangle((x, y), fill=None, outline="#ff0000", width=2)
             draw.text(x, f"Conf: {box['confidence']}", font=font, fill=(255, 255, 0, 128))
 
     return image
@@ -129,6 +129,7 @@ def print_lines(lines):
         print("\n\n== TEXT : CONFIDENCE ===\n")
         for line in lines:
             print(line['Text'], ":", line['Confidence'])
+        print('\n')
 
 def print_forms(kvs):
     if (len(kvs) > 0):
