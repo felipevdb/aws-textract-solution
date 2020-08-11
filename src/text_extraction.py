@@ -124,6 +124,12 @@ def get_text(result, blocks_map):
                                 
     return text
 
+def print_lines(lines):
+    if lines:
+        print("\n\n== TEXT : CONFIDENCE ===\n")
+        for line in lines:
+            print(line['Text'], ":", line['Confidence'])
+
 def print_forms(kvs):
     if (len(kvs) > 0):
         print("\n\n== FOUND KEY : VALUE pairs ===\n")
@@ -268,7 +274,7 @@ def main(filename, APItype, featureType):
     boudingBoxes, lines, key_map, value_map, block_map_forms, block_map_table, table_blocks = get_Block_Informations(blockType, textract_resp)
 
     #Getting Lines and accuracy
-
+    print_lines(lines)
     
     #Get Forms relationship
     key_value = get_forms_relationship(key_map, value_map, block_map_forms)
