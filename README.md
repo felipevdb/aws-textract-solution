@@ -1,11 +1,20 @@
 # AWS Textract Solution
 This repository contains a simple solution that leverages Amazon Textract to analyze documents texts.
 
+## The Solution
+### Input
+<img src="Images/original_image.png" width="250" height="250"/>
+
+### Outputs
+TEXT : CONFIDENCE                                                |TABLE                                                                   |FORMS => FOUND KEY : VALUE pairs                                        |
+:---------------------------------------------------------------:|:----------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+<img src="Images/detect_text.png" width="250" height="250"/>     |<img src="Images/analyze_document_table.png" width="250" height="250"/> |<img src="Images/analyze_document_forms.png" width="250" height="250"/> |
+
 ## Getting started
 ### Built With
 * AWS SDK for Python (boto3)
 * Amazon Textract
-* Python Imaging Library (PIL)
+* Libraries on requirements.txt file
 
 ### Running solution
 Run the following command: 
