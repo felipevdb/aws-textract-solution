@@ -6,9 +6,12 @@ This repository contains a simple solution that leverages Amazon Textract to ana
 <img src="Images/original_image.png" width="250" height="250"/>
 
 ### Outputs
-TEXT : CONFIDENCE                                                |TABLE                                                                   |FORMS => FOUND KEY : VALUE pairs                                        |
-:---------------------------------------------------------------:|:----------------------------------------------------------------------:|:----------------------------------------------------------------------:|
-<img src="Images/detect_text.png" width="250" height="250"/>     |<img src="Images/analyze_document_table.png" width="250" height="250"/> |<img src="Images/analyze_document_forms.png" width="250" height="250"/> |
+            |DetectText API                                                   |AnalyzeDocument - Tables                                                |AnalyzeDocument - Formsm                                                |
+:----------:|:---------------------------------------------------------------:|:----------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+Images:     |<img src="Images/detect_text.png" width="250" height="250"/>     |<img src="Images/analyze_document_table.png" width="250" height="250"/> |<img src="Images/analyze_document_forms.png" width="250" height="250"/> |
+:----------:|:---------------------------------------------------------------:|:----------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+Text:       |TEXT : CONFIDENCE                                                |TABLE                                                                   |FOUND KEY : VALUE pairs                                                 |                               
+                
 
 ## Getting started
 ### Built With
